@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه گردان امام علی</title>
+    <!-- بارگذاری Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* تنظیمات سفارشی برای RTL و فونت */
+        :root {
+            --primary-color: #3b82f6; /* blue-500 */
+            --secondary-color: #10b981; /* emerald-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+        .sidebar-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sidebar-item:hover {
+            background-color: #e5e7eb;
+        }
+        .sidebar-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+        .case-type-btn.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row">
+
+    <!-- صفحه ورود (Login Screen) - اولین چیزی که کاربر می‌بیند -->
+    <div id="login-screen" class="fixed inset-0 bg-gray-100 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">ورود به سامانه</h2>
+            <p class="text-gray-600 mb-6 text-center">لطفاً شناسه نظامی و رمز عبور خود را وارد کنید.</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="military-id" class="block text-sm font-medium text-gray-700 mb-1">شناسه نظامی</label>
+                    <input type="text" id="military-id" placeholder="8012-77-SA" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-left" dir="ltr" required>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">رمز عبور</label>
+                    <input type="password" id="password" placeholder="رمز عبور محرمانه" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-left" dir="ltr" required>
+                </div>
+                <div id="login-message" class="text-red-500 text-sm hidden pt-2 text-center font-semibold"></div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl font-semibold hover:bg-blue-700 transition duration-150 mt-6">ورود</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نوار کناری (Sidebar) - پنهان شده تا زمان ورود موفق -->
+    <div id="sidebar" class="bg-white shadow-lg lg:w-64 w-full p-4 lg:p-6 mb-4 lg:mb-0 lg:h-screen lg:fixed hidden">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center lg:text-right">سامانه گردان امام علی</h1>
+        <nav class="space-y-2">
+            <div id="tab-request" class="sidebar-item active p-3 rounded-lg flex items-center">
+                <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5z"></path></svg>
+                <span>ثبت درخواست</span>
+            </div>
+            <div id="tab-cameras" class="sidebar-item p-3 rounded-lg flex items-center">
+                <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span>گزارش دوربین‌ها</span>
+            </div>
+            <div id="tab-cases" class="sidebar-item p-3 rounded-lg flex items-center">
+                <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 14l-4 2"></path></svg>
+                <span>پرونده‌ها</span>
+            </div>
+            <!-- NEW PROFILE TAB -->
+            <div id="tab-profile" class="sidebar-item p-3 rounded-lg flex items-center">
+                <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span>پروفایل کاربری</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- محتوای اصلی (Main Content) - پنهان شده تا زمان ورود موفق -->
+    <main id="content-area" class="lg:mr-64 p-4 lg:p-8 w-full hidden">
+        <!-- بخش ثبت درخواست -->
+        <div id="section-request" class="content-section">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">ثبت درخواست جدید</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <p class="text-lg text-gray-700 mb-4 border-b pb-3">از این بخش می‌توانید درخواست‌های پشتیبانی، فنی یا گزارش‌های اولیه را ثبت نمایید.</p>
+                <form class="space-y-4">
+                    <div>
+                        <label for="request-type" class="block text-sm font-medium text-gray-700 mb-1">نوع درخواست</label>
+                        <select id="request-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option>گزارش حادثه امنیتی</option>
+                            <option>درخواست دسترسی</option>
+                            <option>پشتیبانی نرم‌افزار</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="request-subject" class="block text-sm font-medium text-gray-700 mb-1">موضوع</label>
+                        <input type="text" id="request-subject" placeholder="مثلاً: اشکال در ورود به سامانه" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="request-description" class="block text-sm font-medium text-gray-700 mb-1">شرح کامل</label>
+                        <textarea id="request-description" rows="5" placeholder="جزئیات درخواست خود را با دقت وارد کنید" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl font-semibold hover:bg-blue-700 transition duration-150">ارسال درخواست</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- بخش گزارش دوربین‌های امنیتی -->
+        <div id="section-cameras" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">گزارش دوربین‌های امنیتی</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <p class="text-lg text-gray-700 mb-4 border-b pb-3">در این بخش می‌توانید وضعیت دوربین‌ها را مشاهده و گزارش‌های ضبط شده را جستجو کنید.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- کارت دوربین 1 -->
+                    <div class="border p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
+                        <p class="text-xl font-semibold mb-2">دوربین اصلی ورودی</p>
+                        <p class="text-sm text-gray-500">موقعیت: بلوک A، درب شرقی</p>
+                        <span class="inline-flex items-center mt-2 px-3 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-full">
+                            <span class="w-2 h-2 bg-green-500 rounded-full ml-1"></span>
+                            فعال
+                        </span>
+                    </div>
+                    <!-- کارت دوربین 2 -->
+                    <div class="border p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
+                        <p class="text-xl font-semibold mb-2">دوربین سرورخانه</p>
+                        <p class="text-sm text-gray-500">موقعیت: زیرزمین، اتاق ۱۰۱</p>
+                        <span class="inline-flex items-center mt-2 px-3 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-full">
+                            <span class="w-2 h-2 bg-red-500 rounded-full ml-1"></span>
+                            غیرفعال (نیاز به تعمیر)
+                        </span>
+                    </div>
+                    <!-- کارت دوربین 3 -->
+                    <div class="border p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
+                        <p class="text-xl font-semibold mb-2">دوربین پارکینگ</p>
+                        <p class="text-sm text-gray-500">موقعیت: محوطه پارکینگ</p>
+                        <span class="inline-flex items-center mt-2 px-3 py-1 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full ml-1"></span>
+                            ضبط متناوب
+                        </span>
+                    </div>
+                </div>
+                
+                <button class="mt-6 bg-gray-200 text-gray-700 p-3 rounded-xl font-semibold hover:bg-gray-300 transition duration-150">مشاهده آرشیو کامل</button>
+            </div>
+        </div>
+
+        <!-- بخش پرونده‌ها -->
+        <div id="section-cases" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">پرونده‌ها</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                
+                <!-- دکمه‌های انتخاب نوع پرونده -->
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mb-6 sm:space-x-reverse">
+                    <button id="btn-ongoing" class="case-type-btn active px-4 py-2 rounded-xl font-semibold transition duration-150 border border-emerald-500 text-emerald-700 bg-emerald-100" data-type="ongoing">
+                        پرونده‌های در جریان
+                    </button>
+                    <button id="btn-closed" class="case-type-btn px-4 py-2 rounded-xl font-semibold transition duration-150 border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200" data-type="closed">
+                        پرونده‌های بسته شده
+                    </button>
+                </div>
+
+                <!-- لیست پرونده‌ها -->
+                <div id="case-list-container">
+                    <!-- محتوای لیست توسط جاوا اسکریپت در اینجا قرار می‌گیرد -->
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW PROFILE SECTION -->
+        <div id="section-profile" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">پروفایل کاربری</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center">
+                <!-- آواتار و نام -->
+                <div class="flex flex-col items-center p-4 md:border-l md:border-gray-200 md:ml-8 mb-6 md:mb-0 w-full md:w-auto">
+                    <!-- Placeholder SVG Avatar -->
+                    <svg class="w-24 h-24 text-blue-500 bg-blue-100 rounded-full mb-3 p-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 20.993V24H0v-3.007a.999.999 0 011-1h22a.999.999 0 011 1zm-12-14a5 5 0 100 10 5 5 0 000-10zM12 0a12 12 0 100 24 12 12 0 000-24zM12 3a9 9 0 110 18 9 9 0 010-18z"></path><path d="M12 16a4 4 0 100-8 4 4 0 000 8z"></path></svg>
+                    <p class="text-2xl font-extrabold text-gray-900">علی بابایی</p>
+                    <p class="text-sm text-gray-500">شناسه: U976135</p>
+                </div>
+
+                <!-- جزئیات اطلاعات -->
+                <div class="flex-grow w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-medium text-gray-500">سمت/سطح کاربری</p>
+                            <p class="text-lg font-semibold text-gray-800">امنیت سایبری گردان</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-medium text-gray-500">شناسه نظامی</p>
+                            <p class="text-lg font-semibold text-gray-800">8012-77-SA</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-medium text-gray-500">تاریخ استخدام</p>
+                            <p class="text-lg font-semibold text-gray-800">۱۳۹۸/۰۵/۰۱</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-medium text-gray-500">آخرین ورود</p>
+                            <p class="text-lg font-semibold text-gray-800">۱۴۰۲/۰۷/۱۸، ساعت ۱۰:۳۰</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md mt-6">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">دسترسی‌ها و مجوزها</h3>
+                <ul class="list-disc pr-5 space-y-2 text-gray-600">
+                    <li>مجوز دسترسی کامل به گزارش‌های امنیتی سطح ۱ و ۲.</li>
+                    <li>مجاز به ثبت و پیگیری پرونده‌های سایبری در جریان.</li>
+                    <li>دسترسی به گزارش‌های تصویری دوربین‌های اتاق سرور.</li>
+                </ul>
+                <button class="mt-4 bg-blue-500 text-white p-2 px-4 rounded-xl font-semibold hover:bg-blue-600 transition duration-150">ویرایش پروفایل</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal برای باز کردن پرونده -->
+    <div id="open-case-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">باز کردن پرونده</h3>
+            <p class="text-gray-600 mb-6">لطفاً برای دسترسی به محتوای پرونده، شناسه و رمز عبور را وارد کنید.</p>
+            
+            <form id="case-access-form" class="space-y-4">
+                <div>
+                    <label for="case-id-input" class="block text-sm font-medium text-gray-700 mb-1">شناسه پرونده</label>
+                    <input type="text" id="case-id-input" placeholder="مثلاً: 2025-001-SA" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div>
+                    <label for="case-password-input" class="block text-sm font-medium text-gray-700 mb-1">رمز عبور</label>
+                    <input type="password" id="case-password-input" placeholder="رمز عبور محرمانه" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div id="modal-message" class="text-red-500 text-sm hidden pt-2"></div>
+                <div class="flex justify-end space-x-3 space-x-reverse pt-4">
+                    <button type="button" id="close-modal-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition duration-150">لغو</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition duration-150">تأیید دسترسی</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            activeTab: 'request',
+            activeCaseType: 'ongoing',
+            isLoggedIn: false // وضعیت جدید برای مدیریت ورود
+        };
+
+        // اعتبارنامه‌های ورود
+        const LOGIN_ID = '8012-77-SA';
+        const LOGIN_PASS = 'ali 1389 8012-77-SA';
+
+        const CASES = {
+            ongoing: [
+                { id: '2025-001-SA', title: 'حمله سایبری و پخش اطلاعات', status: 'در حال بررسی توسط تیم تحلیل' },
+                { id: '2025-002-SR', title: 'سرقت اطلاعات سازمانی توسط کارمند سابق', status: 'جمع‌آوری مدارک و مستندات' }
+            ],
+            closed: [
+                { id: '2024-155-MS', title: 'ترویج به اختشاش و توهین به اورگان‌های دولتی در مدرسه', status: 'حکم قطعی و ارجاع به مراجع' },
+                { id: '2023-080-SD', title: 'سوء استفاده از داده‌های شخصی و فروش غیرمجاز', status: 'بایگانی شده (با موفقیت مختومه)' }
+            ]
+        };
+
+        // المان‌های DOM
+        const sections = {
+            request: document.getElementById('section-request'),
+            cameras: document.getElementById('section-cameras'),
+            cases: document.getElementById('section-cases'),
+            profile: document.getElementById('section-profile')
+        };
+        const tabs = {
+            request: document.getElementById('tab-request'),
+            cameras: document.getElementById('tab-cameras'),
+            cases: document.getElementById('tab-cases'),
+            profile: document.getElementById('tab-profile')
+        };
+        const caseListContainer = document.getElementById('case-list-container');
+        const caseTypeButtons = {
+            ongoing: document.getElementById('btn-ongoing'),
+            closed: document.getElementById('btn-closed')
+        };
+        const modal = document.getElementById('open-case-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const caseAccessForm = document.getElementById('case-access-form');
+        const modalMessage = document.getElementById('modal-message');
+
+        // عناصر جدید مربوط به ورود
+        const loginScreen = document.getElementById('login-screen');
+        const loginForm = document.getElementById('login-form');
+        const loginMessage = document.getElementById('login-message');
+        const sidebar = document.getElementById('sidebar');
+        const contentArea = document.getElementById('content-area');
+
+
+        // --- توابع رندرینگ و منطق اصلی ---
+
+        /**
+         * نمایش بخش فعال و مخفی کردن بقیه
+         */
+        function renderActiveSection() {
+            // این تابع فقط در صورت ورود موفق اجرا می‌شود
+            if (!state.isLoggedIn) return; 
+
+            // مخفی کردن همه بخش‌ها و غیرفعال کردن کلاس active همه تب‌ها
+            Object.values(sections).forEach(section => section.classList.add('hidden'));
+            Object.values(tabs).forEach(tab => tab.classList.remove('active', 'bg-blue-500', 'text-white'));
+            
+            // نمایش بخش و فعال کردن تب
+            if (sections[state.activeTab]) {
+                sections[state.activeTab].classList.remove('hidden');
+            }
+            if (tabs[state.activeTab]) {
+                tabs[state.activeTab].classList.add('active');
+            }
+            
+            // اگر تب پرونده‌ها فعال است، لیست پرونده‌ها را نیز رندر کند
+            if (state.activeTab === 'cases') {
+                renderCaseList(state.activeCaseType);
+            }
+        }
+
+        /**
+         * رندر لیست پرونده‌ها بر اساس نوع (در جریان یا بسته شده)
+         * @param {string} type - 'ongoing' or 'closed'
+         */
+        function renderCaseList(type) {
+            const currentCases = CASES[type];
+            caseListContainer.innerHTML = ''; // پاک کردن محتوای قبلی
+
+            if (currentCases.length === 0) {
+                caseListContainer.innerHTML = '<p class="text-gray-500 text-center py-8">پرونده‌ای در این بخش یافت نشد.</p>';
+                return;
+            }
+
+            const listHtml = currentCases.map(caseItem => `
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-50 border p-4 rounded-xl shadow-sm mb-4">
+                    <!-- جزئیات پرونده -->
+                    <div class="mb-3 sm:mb-0 w-full sm:w-3/4">
+                        <p class="text-lg font-bold text-gray-800">${caseItem.title}</p>
+                        <p class="text-sm text-gray-600 mt-1">شناسه: <span class="font-mono text-blue-600">${caseItem.id}</span></p>
+                        <p class="text-sm text-gray-500 mt-1">وضعیت: ${caseItem.status}</p>
+                    </div>
+                    
+                    <!-- دکمه باز کردن -->
+                    <div class="w-full sm:w-auto flex justify-end">
+                        <button onclick="openCaseModal('${caseItem.id}')" class="px-4 py-2 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition duration-150 shadow-md">
+                            باز کردن
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            caseListContainer.innerHTML = listHtml;
+
+            // به‌روزرسانی استایل دکمه‌های نوع پرونده
+            Object.keys(caseTypeButtons).forEach(key => {
+                caseTypeButtons[key].classList.remove('active', 'bg-emerald-500', 'text-white', 'border-emerald-500');
+                caseTypeButtons[key].classList.add('bg-gray-100', 'text-gray-700', 'border-gray-300');
+            });
+            caseTypeButtons[type].classList.add('active', 'bg-emerald-500', 'text-white', 'border-emerald-500');
+            caseTypeButtons[type].classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-300');
+
+            state.activeCaseType = type; // به‌روزرسانی وضعیت
+        }
+
+
+        /**
+         * نمایش پنجره بازشو (Modal) برای باز کردن پرونده
+         * @param {string} caseId - شناسه پرونده‌ای که قرار است باز شود.
+         */
+        function openCaseModal(caseId) {
+            // پر کردن فیلد شناسه پرونده در مودال
+            document.getElementById('case-id-input').value = caseId;
+            document.getElementById('case-password-input').value = ''; // خالی کردن فیلد رمز
+            modalMessage.classList.add('hidden'); // مخفی کردن پیام خطا
+            modal.classList.remove('hidden'); // نمایش مودال
+        }
+        
+        /**
+         * مدیریت منطق ورود به سامانه
+         */
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const militaryIdInput = document.getElementById('military-id').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+
+            if (militaryIdInput === LOGIN_ID && passwordInput === LOGIN_PASS) {
+                // ورود موفقیت‌آمیز
+                loginMessage.textContent = 'ورود موفقیت‌آمیز. در حال انتقال به داشبورد...';
+                loginMessage.classList.remove('hidden', 'text-red-500');
+                loginMessage.classList.add('text-green-500');
+                
+                // نمایش داشبورد
+                setTimeout(() => {
+                    loginScreen.classList.add('hidden');
+                    sidebar.classList.remove('hidden');
+                    contentArea.classList.remove('hidden');
+                    state.isLoggedIn = true; // به‌روزرسانی وضعیت
+                    renderActiveSection(); // رندر محتوای پیش‌فرض
+                }, 1000);
+
+            } else {
+                // ورود ناموفق
+                loginMessage.textContent = 'شناسه نظامی یا رمز عبور اشتباه است.';
+                loginMessage.classList.remove('hidden', 'text-green-500');
+                loginMessage.classList.add('text-red-500');
+            }
+        }
+
+
+        // --- مدیریت رویدادها ---
+
+        // مدیریت کلیک روی دکمه‌های ناوبری (تب‌ها)
+        Object.keys(tabs).forEach(key => {
+            tabs[key].addEventListener('click', () => {
+                if (state.isLoggedIn) {
+                    state.activeTab = key;
+                    renderActiveSection();
+                }
+            });
+        });
+
+        // مدیریت کلیک روی دکمه‌های نوع پرونده (در جریان / بسته شده)
+        Object.keys(caseTypeButtons).forEach(key => {
+            caseTypeButtons[key].addEventListener('click', (e) => {
+                if (state.isLoggedIn) {
+                    const type = e.target.getAttribute('data-type');
+                    if (type) {
+                        renderCaseList(type);
+                    }
+                }
+            });
+        });
+
+        // بستن Modal
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        
+        // بستن Modal با کلیک بیرون
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // مدیریت ارسال فرم دسترسی پرونده
+        caseAccessForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const caseId = document.getElementById('case-id-input').value.trim();
+            const password = document.getElementById('case-password-input').value.trim();
+            
+            // شبیه‌سازی منطق احراز هویت
+            if (password === 'Admin123!' && caseId) { // رمز عبور آزمایشی
+                modalMessage.textContent = `دسترسی به پرونده ${caseId} موفقیت‌آمیز بود! (شبیه‌سازی باز شدن پرونده)`;
+                modalMessage.classList.remove('text-red-500', 'hidden');
+                modalMessage.classList.add('text-green-500');
+                
+                // در اینجا منطق واقعی باز کردن یا هدایت به صفحه پرونده اجرا می‌شود
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalMessage.classList.add('hidden');
+                }, 2000);
+
+            } else {
+                modalMessage.textContent = 'شناسه پرونده یا رمز عبور اشتباه است.';
+                modalMessage.classList.remove('text-green-500', 'hidden');
+                modalMessage.classList.add('text-red-500');
+            }
+        });
+
+
+        // اجرای اولیه برای نمایش صفحه ورود
+        document.addEventListener('DOMContentLoaded', () => {
+            // افزودن شنونده رویداد به فرم ورود
+            loginForm.addEventListener('submit', handleLogin);
+            
+            // در حالت پیش‌فرض، فقط صفحه ورود نمایش داده می‌شود.
+            // داشبورد (sidebar و content-area) پنهان هستند.
+        });
+
+    </script>
+</body>
+</html>
